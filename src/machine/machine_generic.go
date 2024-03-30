@@ -8,6 +8,7 @@ const deviceName = "generic"
 
 var (
 	UART0 = &UART{0}
+	UART1 = &UART{1}
 	USB   = &UART{100}
 )
 
