@@ -256,7 +256,13 @@ func (r *runner) compileFunction(llvmFn llvm.Value) *function {
 						panic("unknown type: " + elementType.String())
 					}
 				}
-			case llvm.BitCast, llvm.IntToPtr, llvm.PtrToInt:
+			case llvm.PtrToInt:
+				inst.name = llvmInst.Name()
+				inst.operands = []value{
+					r.getValue(llvmInst.Operand(0)),
+					literalValue{uint64(llvmInst.Type().IntTypeWidth())},
+				}
+			case llvm.BitCast, llvm.IntToPtr:
 				// Bitcasts are usually used to cast a pointer from one type to
 				// another leaving the pointer itself intact.
 				inst.name = llvmInst.Name()

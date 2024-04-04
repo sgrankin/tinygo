@@ -674,15 +674,21 @@ func (r *runner) run(fn *function, params []value, parentMem *memoryView, indent
 			if r.debug {
 				fmt.Fprintln(os.Stderr, indent+"gep:", operands, "->", ptr)
 			}
-		case llvm.BitCast, llvm.IntToPtr, llvm.PtrToInt:
-			// Various bitcast-like instructions that all keep the same bits
-			// while changing the LLVM type.
-			// Because interp doesn't preserve the type, these operations are
-			// identity operations.
+		case llvm.BitCast, llvm.IntToPtr:
+			// BitCast keeps the same bits while changing the type.
+			// IntToPtr should expand the raw value if needed, but we get away with just reusing the rawValue.
 			if r.debug {
 				fmt.Fprintln(os.Stderr, indent+instructionNameMap[inst.opcode]+":", operands[0])
 			}
 			locals[inst.localIndex] = operands[0]
+		case llvm.PtrToInt:
+			// PtrToInt truncates to the stored int size.
+			if r.debug {
+				fmt.Fprintln(os.Stderr, indent+instructionNameMap[inst.opcode]+":", operands[0])
+			}
+			// Ignore the error since ptrtoint is smuggling ints in the pointer.
+			pv, _ := operands[0].asPointer(mem.r)
+			locals[inst.localIndex] = makeLiteralInt(pv.pointer, int(operands[1].Int()))
 		case llvm.ExtractValue:
 			agg := operands[0].asRawValue(r)
 			offset := operands[1].(literalValue).value.(uint64)

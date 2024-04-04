@@ -718,7 +718,7 @@ func (v rawValue) clone() value {
 func (v rawValue) asPointer(r *runner) (pointerValue, error) {
 	if v.buf[0] <= 255 {
 		// Probably a null pointer or memory-mapped I/O.
-		return pointerValue{}, errIntegerAsPointer
+		return pointerValue{v.buf[0]}, errIntegerAsPointer
 	}
 	return pointerValue{v.buf[0]}, nil
 }
