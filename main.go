@@ -1437,6 +1437,7 @@ func main() {
 	ldflags := flag.String("ldflags", "", "Go link tool compatible ldflags")
 	llvmFeatures := flag.String("llvm-features", "", "comma separated LLVM features to enable")
 	cpuprofile := flag.String("cpuprofile", "", "cpuprofile output")
+	memprofile := flag.String("memprofile", "", "write memory profile to `file`")
 	monitor := flag.Bool("monitor", false, "enable serial monitor")
 	baudrate := flag.Int("baudrate", 115200, "baudrate of serial monitor")
 
@@ -1885,6 +1886,20 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Unknown command:", command)
 		usage("")
 		os.Exit(1)
+	}
+
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			fmt.Println("could not create memory profile: ", err)
+			os.Exit(1)
+		}
+		defer f.Close() // error handling omitted for example
+		runtime.GC()    // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			fmt.Println("could not write memory profile: ", err)
+			os.Exit(1)
+		}
 	}
 }
 
