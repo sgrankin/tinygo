@@ -385,7 +385,7 @@ func makeLiteralInt(value uint64, bits int) literalValue {
 	case 8:
 		return literalValue{uint8(value)}
 	default:
-		panic("unknown integer size")
+		panic(fmt.Sprintf("unknown integer size %d", bits))
 	}
 }
 
@@ -400,7 +400,7 @@ func (v literalValue) len(r *runner) uint32 {
 	case uint8:
 		return 1
 	default:
-		panic("unknown value type")
+		panic(fmt.Sprintf("unknown value type %T", v.value))
 	}
 }
 
